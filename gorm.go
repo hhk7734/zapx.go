@@ -73,8 +73,10 @@ func (l GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (strin
 		l.logger(ctx).Warn("trace: slow",
 			zap.Duration("elapsed", elapsed), zap.Int64("rows", rows), zap.String("sql", sql))
 	case l.LogLevel == logger.Info:
+		// This log is printed when LogLevel is Info or when
+		// (*gorm.DB).Debug().Something() is called.
 		sql, rows := fc()
-		l.logger(ctx).Info("trace: info",
+		l.logger(ctx).Debug("trace: debug",
 			zap.Duration("elapsed", elapsed), zap.Int64("rows", rows), zap.String("sql", sql))
 	}
 }
