@@ -97,7 +97,7 @@ func (l GormLogger) logger(ctx context.Context) *zap.Logger {
 		case strings.Contains(file, "gorm.io/gorm"):
 			continue
 		default:
-			return Ctx(ctx).WithOptions(zap.AddCallerSkip(i))
+			return Ctx(ctx).WithOptions(zap.AddCallerSkip(i - 1))
 		}
 	}
 	return Ctx(ctx)
