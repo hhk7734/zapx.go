@@ -122,3 +122,21 @@ func main() {
 
 {"level":"debug","ts":1689501127.6482286,"caller":"zapx.go/main.go:37","msg":"trace: debug","test":"test","elapsed":0.00357918,"rows":1,"sql":"INSERT INTO `users` (`created_at`,`updated_at`,`deleted_at`,`name`) VALUES (\"2023-07-16 18:52:07.644\",\"2023-07-16 18:52:07.644\",NULL,\"test\") RETURNING `id`"}
 ```
+
+If you want to ignore ErrRecordNotFound, set `IgnoreRecordNotFoundError` to true.
+
+```go
+	db, _ := gorm.Open(
+		sqlite.Open("test.db"),
+		&gorm.Config{
+			Logger: &zapx.GormLogger{
+				Config: zapx.Config{
+					SlowThreshold:             200 * time.Millisecond,
+					Colorful:                  false, // not support
+					IgnoreRecordNotFoundError: true,
+					ParameterizedQueries:      false,
+					LogLevel:                  zapx.Warn,
+				},
+			},
+		})
+```

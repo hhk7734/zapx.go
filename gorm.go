@@ -12,25 +12,34 @@ import (
 	"gorm.io/gorm/logger"
 )
 
-var _ logger.Interface = new(GormLogger)
-var _ gorm.ParamsFilter = new(GormLogger)
+type Config = logger.Config
+
+const (
+	Silent = logger.Silent
+	Error  = logger.Error
+	Warn   = logger.Warn
+	Info   = logger.Info
+)
 
 func DefaultGormLogger() logger.Interface {
 	return &GormLogger{
-		Config: logger.Config{
+		Config: Config{
 			SlowThreshold:             200 * time.Millisecond,
 			Colorful:                  false,
 			IgnoreRecordNotFoundError: false,
 			ParameterizedQueries:      false,
-			LogLevel:                  logger.Warn,
+			LogLevel:                  Warn,
 		},
 	}
 }
 
+var _ logger.Interface = new(GormLogger)
+var _ gorm.ParamsFilter = new(GormLogger)
+
 // GormLogger is gorm.logger.Interface implementation using zapx.Ctx. It is not support
 // Colorful.
 type GormLogger struct {
-	logger.Config
+	Config
 }
 
 func (l *GormLogger) LogMode(level logger.LogLevel) logger.Interface {
@@ -40,39 +49,39 @@ func (l *GormLogger) LogMode(level logger.LogLevel) logger.Interface {
 }
 
 func (l GormLogger) Info(ctx context.Context, str string, args ...interface{}) {
-	if l.LogLevel >= logger.Info {
+	if l.LogLevel >= Info {
 		l.logger(ctx).Sugar().Infof(str, args...)
 	}
 }
 
 func (l GormLogger) Warn(ctx context.Context, str string, args ...interface{}) {
-	if l.LogLevel >= logger.Warn {
+	if l.LogLevel >= Warn {
 		l.logger(ctx).Sugar().Warnf(str, args...)
 	}
 }
 
 func (l GormLogger) Error(ctx context.Context, str string, args ...interface{}) {
-	if l.LogLevel >= logger.Error {
+	if l.LogLevel >= Error {
 		l.logger(ctx).Sugar().Errorf(str, args...)
 	}
 }
 
 func (l GormLogger) Trace(ctx context.Context, begin time.Time, fc func() (string, int64), err error) {
-	if l.LogLevel <= logger.Silent {
+	if l.LogLevel <= Silent {
 		return
 	}
 
 	elapsed := time.Since(begin)
 	switch {
-	case err != nil && l.LogLevel >= logger.Error && (!errors.Is(err, logger.ErrRecordNotFound) || !l.IgnoreRecordNotFoundError):
+	case err != nil && l.LogLevel >= Error && (!errors.Is(err, logger.ErrRecordNotFound) || !l.IgnoreRecordNotFoundError):
 		sql, rows := fc()
 		l.logger(ctx).Error("trace: error",
 			zap.Duration("elapsed", elapsed), zap.Int64("rows", rows), zap.String("sql", sql), zap.Error(err))
-	case elapsed > l.SlowThreshold && l.SlowThreshold != 0 && l.LogLevel >= logger.Warn:
+	case elapsed > l.SlowThreshold && l.SlowThreshold != 0 && l.LogLevel >= Warn:
 		sql, rows := fc()
 		l.logger(ctx).Warn("trace: slow",
 			zap.Duration("elapsed", elapsed), zap.Int64("rows", rows), zap.String("sql", sql))
-	case l.LogLevel == logger.Info:
+	case l.LogLevel == Info:
 		// This log is printed when LogLevel is Info or when
 		// (*gorm.DB).Debug().Something() is called.
 		sql, rows := fc()
