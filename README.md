@@ -140,3 +140,13 @@ If you want to ignore ErrRecordNotFound, set `IgnoreRecordNotFoundError` to true
 			},
 		})
 ```
+
+### jq
+
+```shell
+alias log2jq="jq -R -r '. as \$line | try fromjson catch \$line'"
+```
+
+```shell
+go run <path> 2>&1 | log2jq
+```
