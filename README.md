@@ -50,6 +50,8 @@ func C(ctx context.Context) {
 
 ### Dict
 
+:warning: Deprecated: use zap.Dict instead. (go.uber.org/zap v1.26.0)
+
 ```go
 package main
 
