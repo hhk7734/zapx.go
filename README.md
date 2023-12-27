@@ -146,7 +146,7 @@ If you want to ignore ErrRecordNotFound, set `IgnoreRecordNotFoundError` to true
 ### jq
 
 ```shell
-alias log2jq="jq -R -r '. as \$line | try fromjson catch \$line'"
+alias log2jq="jq -rRC --unbuffered '. as \$line | try fromjson catch \$line' | sed 's/\\\\n/\\n/g; s/\\\\t/\\t/g'"
 ```
 
 ```shell
